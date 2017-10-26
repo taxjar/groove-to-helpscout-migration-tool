@@ -168,7 +168,7 @@ class TicketProcessor implements ProcessorInterface
                     $thread->setCreatedBy($personRef);
 
                     // Set assigned Agent
-                    if (isset($grooveMessage['links']['assignee'])) {
+                    if (isset($grooveTicket['links']['assignee'])) {
                       $ownerRef = self::agentPersonRef($grooveTicket['links']['assignee']['href'], 'agent');
                       if ($ownerRef) {
                         $thread->setAssignedTo($ownerRef);
@@ -209,17 +209,21 @@ class TicketProcessor implements ProcessorInterface
      */
     private static function extractEmailAddressFromGrooveLink($grooveLink, $personType)
     {
+      try {
         $matches = array();
         if (preg_match('@^https?://api.groovehq.com/v1/customers/(.*)@i',
                 $grooveLink, $matches) === 1
         ) {
             return array($matches[1], 'customer');
-        } elseif (preg_match('@^https://api.groovehq.com/v1/agents/(.*)@i',
+        } elseif (preg_match('@^https?://api.groovehq.com/v1/agents/(.*)@i',
                 $grooveLink, $matches) === 1
         ) {
             return array($matches[1], 'agent');
         }
         throw new ApiException("No $personType defined for Groove link: " . $grooveLink);
+      } catch (\Exception $e) {
+        throw new ApiException("BOOM: " . $e);
+      }
     }
 
     /**
@@ -268,7 +272,7 @@ class TicketProcessor implements ProcessorInterface
         $matches = array();
         $helpscoutAttachments = array();
         $failedAttachments = array();
-        if (preg_match('@^https://api.groovehq.com/v1/attachments\?message=(.*)@i',
+        if (preg_match('@^https?://api.groovehq.com/v1/attachments\?message=(.*)@i',
                 $grooveMessage['links']['attachments']['href'], $matches) === 1
         ) {
             $grooveMessageId = $matches[1];

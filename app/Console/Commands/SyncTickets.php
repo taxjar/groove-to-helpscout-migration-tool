@@ -169,7 +169,7 @@ class SyncTickets extends SyncCommandBase
         $grooveTicketsQueryResponse = $this->makeRateLimitedRequest(
             GROOVE,
             function () use ($ticketsService) {
-                return $ticketsService->list(['page' => 1, 'per_page' => 10])['meta'];
+                return $ticketsService->list(['page' => 1, 'per_page' => 10, 'state' => 'closed'])['meta'];
             });
         $totalTickets = $grooveTicketsQueryResponse['pagination']['total_count'];
         $totalPages = $grooveTicketsQueryResponse['pagination']['total_pages'];
@@ -185,14 +185,13 @@ class SyncTickets extends SyncCommandBase
         }
 
         $numberTickets = 0;
-
         while ($pageNumber <= $stopPage) {
             $this->line("\n\n=== Starting page " . $pageNumber . " of $stopPage ($totalTickets total tickets, $totalPages total pages) ===", 'header');
             $this->displayETA($startTime, $startPage, $pageNumber, $stopPage);
             $grooveTicketsResponse = $this->makeRateLimitedRequest(
                 GROOVE,
                 function () use ($ticketsService, $pageNumber) {
-                    return $ticketsService->list(['page' => $pageNumber, 'per_page' => 10])['tickets'];
+                    return $ticketsService->list(['page' => $pageNumber, 'per_page' => 10, 'state' => 'closed'])['tickets'];
                 },
                 TicketProcessor::getProcessor($this),
                 TicketPublisher::getPublisher($this)

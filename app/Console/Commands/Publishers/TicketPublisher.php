@@ -56,6 +56,7 @@ class TicketPublisher implements PublisherInterface
                         foreach ($e->getErrors() as $error) {
                             $errorMessage = 'Error: [' . $error['property'] . '] ' . $error['message'] . ' (value = ' . print_r($error['value'], TRUE) . ") (Groove ticket #$grooveTicketNumber)";
                             $errorMapping[$error['message']] [] = $errorMessage;
+                            $consoleCommand->error($errorMessage . str_pad(' ', 20));
                             $consoleCommand->getProgressBar()->setMessage($errorMessage . str_pad(' ', 20));
                         }
                     } else {
